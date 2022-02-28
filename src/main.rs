@@ -12,39 +12,69 @@ macro_rules! timeit {
 }
 
 fn main() {
+  // check it if is working correctly
+  // 7919 is taken from wikipedia
   assert_eq!(primes_iter().nth(999), Some(7919));
+  assert_eq!(primes_sieve(1_000).get(999), Some(&7919_usize));
 
   timeit!(
     {
-      primes_iter().take(1_000).for_each(drop);
+      primes_iter().take(10_000).for_each(drop);
     },
-    "1k primes (iter)"
+    "10k primes (iter)"
   );
 
   timeit!(
     {
-      primes_iter().nth(100_000 - 1);
+      primes_iter().nth(9999);
     },
-    "100k-th prime (iter)"
+    "10k-th prime (iter)"
+  );
+
+  timeit!(
+    {
+      primes_sieve(10_000);
+    },
+    "10k primes (sieve)"
   );
 }
 
-fn primes_iter() -> impl Iterator<Item = u64> {
-  let is_prime = |n: &u64| -> bool {
-    if *n <= 3 {
-      return *n > 1;
+fn is_prime(n: &usize) -> bool {
+  if *n <= 3 {
+    return *n > 1;
+  }
+
+  if n % 2 == 0 || n % 3 == 0 {
+    return false;
+  }
+
+  let upper_bound = ((*n as f64).sqrt().ceil() + 1.0) as usize;
+
+  (5_usize..upper_bound)
+    .step_by(6)
+    .all(|i| n % i != 0 && n % (i + 2) != 0)
+}
+fn primes_iter() -> impl Iterator<Item = usize> {
+  (2..).filter(is_prime)
+}
+
+fn primes_sieve(count: usize) -> Vec<usize> {
+  let mut primes = Vec::with_capacity(count);
+
+  let mut n = 2;
+
+  'outer: while primes.len() < count {
+    for i in &primes {
+      if n % i == 0 {
+        n += 1;
+        continue 'outer;
+      }
     }
 
-    if n % 2 == 0 || n % 3 == 0 {
-      return false;
-    }
+    primes.push(n);
 
-    let upper_bound = ((*n as f64).sqrt().ceil() + 1.0) as u64;
+    n += 1
+  }
 
-    (5_u64..upper_bound)
-      .step_by(6)
-      .all(|i| n % i != 0 && n % (i + 2) != 0)
-  };
-
-  (1..).filter(is_prime)
+  primes
 }

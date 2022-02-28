@@ -3,12 +3,11 @@ use std::time::Instant;
 fn main() {
   let start = Instant::now();
 
-  (0..).filter(is_prime).take(1000).for_each(drop);
+  (1..).filter(is_prime).take(10_000).for_each(drop);
   // .collect::<Vec<_>>();
 
   let elapsed = start.elapsed();
-
-  println!("1k primes in {elapsed:?}");
+  println!("10k primes in {elapsed:?}");
 }
 
 fn is_prime(n: &usize) -> bool {

@@ -27,8 +27,6 @@ fn main() {
 
   const COUNT: usize = 2_000_000;
 
-//  assert!(is_x86_feature_detected!("avx2"));
-
   timeit!(
     primes_iter().take(COUNT).collect::<Vec<_>>(),
     "2M primes (iter::collect)"
